@@ -116,8 +116,9 @@ export default function ChatPage() {
             />
             <Button
               onClick={sendMessage}
+              className="h-[60px] px-6 rounded-md bg-gray-700 p-5 cursor-pointer hover:bg-gray-800" // Matches textarea height
               disabled={loading || !input.trim()}
-              className="h-[60px] px-6" // Matches textarea height
+              
             >
               {loading ? (
                 <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
