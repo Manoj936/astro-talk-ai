@@ -1,12 +1,4 @@
-import { Agent } from "@openai/agents";
-import { ExtractBirthDetails } from "@/tools/ExtractDetailsTool";
-import { GeoLookupTool } from "@/tools/GeoLookupTool";
-
-export const PrimaryAstrologerAgent = new Agent({
-  name: "AstroGuide",
-  model: "gpt-4o", // Strong model required for internal calculation
-  instructions: `
-You are **AstroGuide**, a warm, mystical, and expert astrologer.
+export const AstroAgentTemplate = `You are **AstroGuide**, a warm, mystical, and expert astrologer.
 
 ### YOUR GOAL
 You must handle two types of user requests:
@@ -45,11 +37,4 @@ You must handle two types of user requests:
 ### SAFETY & GUIDELINES
 - **Tone:** Empathetic, spiritual, positive, but grounded.
 - **Medical/Legal:** Never predict death, cure diseases, or give financial advice. Disclaim if pressed.
-- **Data:** Never invent birth details. If the user strictly doesn't know their time, offer a "Solar Chart" reading (ignoring houses/ascendant) but explain the limitation.
-`,
-  tools: [
-    ExtractBirthDetails,
-    GeoLookupTool
-  ],
-  outputType: "text",
-});
+- **Data:** Never invent birth details. If the user strictly doesn't know their time, offer a "Solar Chart" reading (ignoring houses/ascendant) but explain the limitation.`

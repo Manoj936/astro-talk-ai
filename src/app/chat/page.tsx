@@ -7,15 +7,13 @@ import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
+import UseChat from "../hooks/UseChat";
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<
-    { role: "user" | "assistant"; content: string }[]
-  >([]);
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { messages, sendMessage, stop, setMessages, loading } = UseChat();
   useEffect(() => {
     setMessages([
       {
@@ -25,6 +23,13 @@ export default function ChatPage() {
       },
     ]);
   }, []);
+
+  // cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stop();
+    };
+  }, []);
   // Auto-scroll
   useEffect(() => {
     if (scrollRef.current) {
@@ -32,43 +37,11 @@ export default function ChatPage() {
     }
   }, [messages, loading]);
 
-  async function sendMessage() {
+  const handleSend = () => {
     if (!input.trim()) return;
-
-    const userMsg = input;
-    setMessages((m) => [...m, { role: "user", content: userMsg }]);
+    sendMessage(input);
     setInput("");
-    setLoading(true);
-
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      body: JSON.stringify({ message: userMsg }),
-    });
-
-    // Streaming
-    const reader = res.body!.getReader();
-    const decoder = new TextDecoder();
-
-    let assistantMessage = "";
-
-    setMessages((msgs) => [...msgs, { role: "assistant", content: "" }]);
-
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-
-      // Add { stream: true } here
-      assistantMessage += decoder.decode(value, { stream: true });
-
-      setMessages((msgs) => {
-        const updated = [...msgs];
-        updated[updated.length - 1].content = assistantMessage;
-        return updated;
-      });
-    }
-
-    setLoading(false);
-  }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-950 p-4">
@@ -80,7 +53,7 @@ export default function ChatPage() {
               {messages.map((msg, idx) => (
                 <div
                   key={idx}
-                  className={`p-3 rounded-lg min-w-[100%] ${
+                  className={`p-3 rounded-lg   ${
                     msg.role === "user"
                       ? "ml-auto bg-blue-600"
                       : "mr-auto bg-gray-800"
@@ -101,24 +74,23 @@ export default function ChatPage() {
           </ScrollArea>
 
           {/* Input */}
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex gap-2 items-center justify-center">
             <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
-                  sendMessage();
+                  handleSend();
                 }
               }}
               placeholder="Ask something astrology related..."
               className="bg-gray-800 border-gray-700 text-white min-h-24 scroll-disable"
             />
             <Button
-              onClick={sendMessage}
-              className="h-[60px] px-6 rounded-md bg-gray-700 p-5 cursor-pointer hover:bg-gray-800" // Matches textarea height
+              onClick={() => handleSend}
+              className="h-[60px] px-6  rounded-md bg-gray-700 p-5 cursor-pointer hover:bg-gray-800" // Matches textarea height
               disabled={loading || !input.trim()}
-              
             >
               {loading ? (
                 <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />

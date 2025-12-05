@@ -6,9 +6,10 @@ import {
 } from "@openai/agents";
 import { receptionAgent } from "@/agents/Reception";
 
+
 export async function POST(req: NextRequest) {
   const { message } = await req.json();
-
+  
   const stream = new ReadableStream({
     async start(controller) {
       const encoder = new TextEncoder();
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
       try {
         // 1. Get the raw result stream
         const result = await run(receptionAgent, message, { stream: true });
-
+       
         // 2. Convert it to a simple text stream
         // This helper handles all the complex event parsing for you
         const textStream = result.toTextStream();
