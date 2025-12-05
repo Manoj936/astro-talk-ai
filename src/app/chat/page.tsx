@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { Card, CardContent } from "@/components/ui/card";
-
+import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,6 +16,15 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    setMessages([
+      {
+        role: "assistant",
+        content:
+          "Hello! I'm AstroTalk, your astrology assistant. How can I help you today?",
+      },
+    ]);
+  }, []);
   // Auto-scroll
   useEffect(() => {
     if (scrollRef.current) {
@@ -103,10 +112,20 @@ export default function ChatPage() {
                 }
               }}
               placeholder="Ask something astrology related..."
-              className="bg-gray-800 border-gray-700 text-white min-h-24"
+              className="bg-gray-800 border-gray-700 text-white min-h-24 scroll-disable"
             />
-            <Button onClick={sendMessage} disabled={loading}>
-              Send
+            <Button
+              onClick={sendMessage}
+              disabled={loading || !input.trim()}
+              className="h-[60px] px-6" // Matches textarea height
+            >
+              {loading ? (
+                <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+              ) : (
+                <>
+                  Send <Send className="ml-2 w-4 h-4" />
+                </>
+              )}
             </Button>
           </div>
         </CardContent>
