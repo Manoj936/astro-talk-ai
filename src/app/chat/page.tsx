@@ -12,16 +12,18 @@ import UseChat from "../hooks/UseChat";
 export default function ChatPage() {
   const [input, setInput] = useState("");
 
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   const { messages, sendMessage, stop, setMessages, loading } = UseChat();
+
+  // initial assistant greeting (only once)
   useEffect(() => {
     setMessages([
       {
         role: "assistant",
-        content:
-          "Hello! I'm AstroTalk, your astrology assistant. How can I help you today?",
+        content: "Hello! I'm AstroTalk, your astrology assistant. How can I help you today?",
       },
     ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // cleanup on unmount
@@ -29,11 +31,14 @@ export default function ChatPage() {
     return () => {
       stop();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  // Auto-scroll
+
+  // Auto-scroll to bottom when messages change
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    const el = scrollRef.current;
+    if (el) {
+      el.scrollTop = el.scrollHeight;
     }
   }, [messages, loading]);
 
@@ -50,25 +55,28 @@ export default function ChatPage() {
           {/* Messages */}
           <ScrollArea className="flex-1 pr-3 w-full" ref={scrollRef}>
             <div className="space-y-4">
-              {messages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`p-3 rounded-lg   ${
-                    msg.role === "user"
-                      ? "ml-auto bg-blue-600"
-                      : "mr-auto bg-gray-800"
-                  }`}
-                >
-                  <ReactMarkdown>
-                    {loading ? msg.content + "..." : msg.content}
-                  </ReactMarkdown>
-                </div>
-              ))}
+              {messages.map((msg, idx) => {
+                // Determine if this is the assistant message currently streaming
+                const isLast = idx === messages.length - 1;
+                const isStreamingAssistant = loading && isLast && msg.role === "assistant";
 
-              {loading && (
-                <div className="mr-auto bg-gray-800 p-3 rounded-lg animate-pulse">
-                  ...
-                </div>
+                return (
+                  <div
+                    key={idx}
+                    className={`p-3 rounded-lg ${
+                      msg.role === "user" ? "ml-auto bg-blue-600" : "mr-auto bg-gray-800"
+                    }`}
+                  >
+                    <ReactMarkdown>
+                      {isStreamingAssistant ? msg.content + "..." : msg.content}
+                    </ReactMarkdown>
+                  </div>
+                );
+              })}
+
+              {/* Optional skeleton while loading (keeps structure stable) */}
+              {!messages.length && loading && (
+                <div className="mr-auto bg-gray-800 p-3 rounded-lg animate-pulse">...</div>
               )}
             </div>
           </ScrollArea>
@@ -88,8 +96,8 @@ export default function ChatPage() {
               className="bg-gray-800 border-gray-700 text-white min-h-24 scroll-disable"
             />
             <Button
-              onClick={() => handleSend}
-              className="h-[60px] px-6  rounded-md bg-gray-700 p-5 cursor-pointer hover:bg-gray-800" // Matches textarea height
+              onClick={handleSend}
+              className="h-[60px] px-6 rounded-md bg-gray-700 p-5 cursor-pointer hover:bg-gray-800"
               disabled={loading || !input.trim()}
             >
               {loading ? (
