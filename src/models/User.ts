@@ -26,24 +26,20 @@ const userSchema = new mongoose.Schema<IUser>(
 );
 
 // Add indexes for commonly queried fields
-userSchema.index({ email: 1 }); // Already unique, but explicit index
 userSchema.index({ isVerified: 1 });
 userSchema.index({ role: 1 });
 userSchema.index({ softDelete: 1 });
 userSchema.index({ createdAt: -1 }); // For sorting by creation date
 
-(userSchema.pre as any)(
-  "save",
-  async function (
-    this: mongoose.HydratedDocument<IUser>,
-    next: (err?: Error) => void
-  ) {
-    if (this.isModified("password")) {
-      this.password = await hashPassword(this.password, 10);
-    }
-    next();
-  }
-);
+
+// userSchema.pre("save", async function (next) {
+//   if (this.isModified("password")) {
+//     this.password = await hashPassword(this.password, 10);
+//     console.log(this.password , "presave checking")
+//   }
+//   next();
+// });
+
 const User = mongoose.models?.User || mongoose.model<IUser>("User", userSchema);
 
 export default User;

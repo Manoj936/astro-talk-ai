@@ -6,7 +6,7 @@ import {
 } from "@openai/agents";
 import { receptionAgent } from "@/agents/Reception";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/Auth";
+import { authOptions } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);

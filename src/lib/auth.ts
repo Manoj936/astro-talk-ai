@@ -22,23 +22,34 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const email = credentials.email as string;
-        const password = credentials.password as string;
+        try {
+          const email = credentials.email as string;
+          const password = credentials.password as string;
 
-        await connectDB();
+          await connectDB();
 
-        const user = await User.findOne({ email });
+          const user = await User.findOne({ email });
 
-        if (!user) return null;
+          if (!user) {
+            console.log("User not found:", email);
+            return null;
+          }
 
-        const valid = await verrifyPassword(password, user.password);
-        if (!valid) return null;
+          const valid = await verrifyPassword(password, user.password);
+          if (!valid) {
+            console.log("Invalid password for user:", email);
+            return null;
+          }
 
-        return {
-          id: user._id.toString(),
-          email: user.email,
-          name: user.name || null,
-        };
+          return {
+            id: user._id.toString(),
+            email: user.email,
+            name: user.name || null,
+          };
+        } catch (error) {
+          console.error("Auth error:", error);
+          return null;
+        }
       },
     }),
   ],

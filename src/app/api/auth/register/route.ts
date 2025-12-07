@@ -23,24 +23,26 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    const hashed = await hashPassword(password , 10);
+    const hasedPass = await hashPassword(password , 10)
+    console.log(hasedPass ,"hasedPass")
+    // Password will be hashed automatically by the pre-save hook
     const newUser = await User.create({
       email,
-      password : hashed,
+      password : hasedPass,
       name,
       isVerified: false,
       role: "user",
       softDelete: false,
-      createdAt: new Date(),
     });
 
     return NextResponse.json(
       { message: "User created successfully" , ok:true  },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
+    console.error("Registration error:", error);
     return NextResponse.json(
-      { error: "Internal server error" , ok:false },
+      { error: error.message || "Internal server error", ok: false },
       { status: 500 }
     );
   }
