@@ -25,6 +25,13 @@ const userSchema = new mongoose.Schema<IUser>(
   { timestamps: true }
 );
 
+// Add indexes for commonly queried fields
+userSchema.index({ email: 1 }); // Already unique, but explicit index
+userSchema.index({ isVerified: 1 });
+userSchema.index({ role: 1 });
+userSchema.index({ softDelete: 1 });
+userSchema.index({ createdAt: -1 }); // For sorting by creation date
+
 (userSchema.pre as any)(
   "save",
   async function (

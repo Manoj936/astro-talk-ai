@@ -5,9 +5,16 @@ import {
   OutputGuardrailTripwireTriggered 
 } from "@openai/agents";
 import { receptionAgent } from "@/agents/Reception";
-
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/Auth";
 
 export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  const userId = (session?.user as { id?: string })?.id;
+
+  if (!userId) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
   const { message } = await req.json();
   
   const stream = new ReadableStream({
