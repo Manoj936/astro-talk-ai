@@ -7,3 +7,4 @@ export async function hashPassword(password:string, saltRounds:number): Promise<
 export async function verrifyPassword(password:string , hashedPassword:string): Promise<boolean> {
     return await bcrypt.compare(password, hashedPassword);
 }
+

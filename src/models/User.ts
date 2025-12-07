@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { hashPassword } from "../lib/password";
+import { hashPassword } from "@/lib/password";
 
 export interface IUser {
   email: string;
